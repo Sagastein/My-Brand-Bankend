@@ -5,15 +5,15 @@ import { checkAuth, checkAdmin } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get("/", checkAuth, checkAdmin, userController.getUsers);
+router.get("/", checkAuth,checkAdmin, userController.getUsers);
 router.get("/:id", userController.getUser);
 router.post(
   "/",
   validateSchema(schemas.userSchema.create),
   userController.createUser
 );
-router.put("/:id", checkAuth, checkAdmin, userController.updateUser);
-router.delete("/:id", userController.deleteUser);
+router.put("/:id", checkAuth, userController.updateUser);
+router.delete("/:id", checkAuth, userController.deleteUser);
 router.post(
   "/login",
   validateSchema(schemas.userSchema.login),
