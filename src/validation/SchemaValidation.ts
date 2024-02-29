@@ -1,8 +1,9 @@
 //user joi validation schema
 
 import Joi from "joi";
+import { Request, Response, NextFunction } from "express";
 export const validateSchema = (schema: Joi.ObjectSchema) => {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.message });
@@ -42,6 +43,13 @@ export const schemas = {
       email: Joi.string().email().required(),
       subject: Joi.string().required(),
       message: Joi.string().required(),
+    }),
+  },
+  blogSchema: {
+    create: Joi.object({
+      title: Joi.string().required(),
+      content: Joi.string().required(),
+      
     }),
   },
 };
