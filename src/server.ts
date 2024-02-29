@@ -4,10 +4,12 @@ import { UserRouter } from "./routes/user.route";
 import { MessageRouter } from "./routes/message.route";
 import { blogRouter } from "./routes/blog.route";
 import { commentRouter } from "./routes/comment.route";
+import cookieParser from "cookie-parser";
 const server = express();
 const PORT = 8000;
 
 server.use(express.json());
+server.use(cookieParser());
 server.use(express.urlencoded({ extended: true }));
 const app = Router();
 server.use("/api/v1", app);
