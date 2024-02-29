@@ -89,7 +89,7 @@ class UserController {
   async Login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const user = await userModel.findOne({ email });
+      const user = await userModel.findOne({ email }).select("+password");
       if (!user) {
         return res.status(400).json({ message: "user not found" });
       }

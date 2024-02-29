@@ -21,7 +21,7 @@ const userSchema = new Schema<User>({
   fullName: { type: String, required: true, unique: true },
   username: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   phoneNumber: { type: Number, required: true },
   image: { type: String, default: "https://www.gravatar.com/avatar/" },
   role: {
