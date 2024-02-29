@@ -5,11 +5,16 @@ import { MessageRouter } from "./routes/message.route";
 import { blogRouter } from "./routes/blog.route";
 import { commentRouter } from "./routes/comment.route";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import bodyParser from "body-parser";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+const swaggerDocument = YAML.load("./src/config/swagger.yaml");
 const server = express();
 const PORT = 8000;
-
+server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 server.use(express.json());
+server.use(cors());
 server.use(bodyParser.json());
 server.use(cookieParser());
 server.use(express.urlencoded({ extended: true }));
