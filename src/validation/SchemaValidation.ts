@@ -25,6 +25,16 @@ export const schemas = {
       fullName: Joi.string().min(6),
       phoneNumber: Joi.number().min(10).max(12),
     }),
+    login: Joi.object({
+      email: Joi.string()
+        .email()
+        .required()
+        .error(new Error("Email is required")),
+      password: Joi.string()
+        .min(6)
+        .required()
+        .error(new Error("Password must be at least 6 characters long")),
+    }),
   },
   messageSchema: {
     create: Joi.object({

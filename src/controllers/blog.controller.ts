@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import mongoose, { Document } from "mongoose";
 import { cloudinary } from "../config/cloudinary";
 import { MulterError } from "multer";
+import { User } from "../models/user.model";
 interface UploadError extends MulterError {
   message: string;
 }
@@ -113,7 +114,7 @@ class BlogController {
       }
 
       const updateData = {
-        ...req.body, 
+        ...req.body,
         ...(imageURL ? { image: imageURL } : {}),
       };
 
@@ -139,19 +140,17 @@ class BlogController {
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-      const userId = req.body.userId;
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
+      const _id = req.user?._id as Document["_id"];
+
       const blog = await blogModel.findById(blogId);
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
-      if (blog.likes.includes(userId)) {
-        blog.likes = blog.likes.filter((id) => id.toString() !== userId);
+      if (blog.likes.includes(_id)) {
+        blog.likes = blog.likes.filter((id) => id.toString() !== _id);
         await blog.save();
       } else {
-        blog.likes.push(userId);
+        blog.likes.push(_id);
         await blog.save();
       }
 

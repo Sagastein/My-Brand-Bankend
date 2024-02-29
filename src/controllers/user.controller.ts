@@ -1,7 +1,10 @@
 import { idSchema } from "../validation/SchemaValidation";
-import userModel from "../models/user.model";
+import userModel, { User } from "../models/user.model";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import Jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 class UserController {
   async getUsers(req: Request, res: Response) {
@@ -83,5 +86,40 @@ class UserController {
       }
     }
   }
+  async Login(req: Request, res: Response) {
+    try {
+      const { email, password } = req.body;
+      const user = await userModel.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: "user not found" });
+      }
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      const userWithoutPassword: any = user.toObject();
+      delete userWithoutPassword.password;
+
+      const accessToken = Jwt.sign(
+        { userData: userWithoutPassword },
+        process.env.JWT_SECRET ?? "",
+        { expiresIn: "10h" }
+      );
+      return res
+        .cookie("Authorization", accessToken, {
+          httpOnly: true,
+          maxAge: 60 * 600 * 1000,
+        })
+        .status(200)
+        .json({
+          message: "Authorized",
+          user: userWithoutPassword,
+        });
+      return res.json(user);
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }
+
 export default new UserController();
