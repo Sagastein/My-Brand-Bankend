@@ -1,7 +1,6 @@
-import blogModel, { Blog } from "../models/blog.model";
+import blogModel from "../models/blog.model";
 import { NextFunction, Request, Response } from "express";
 import mongoose, { Document } from "mongoose";
-import { upload } from "../config/multer";
 import { cloudinary } from "../config/cloudinary";
 import { MulterError } from "multer";
 interface UploadError extends MulterError {
@@ -65,8 +64,6 @@ class BlogController {
           .status(400)
           .json({ message: "Image upload failed", imageURL });
       const clearData = { ...req.body, image: imageURL };
-      if (clearData)
-        return res.status(400).json({ message: "cleared data", clearData });
       const newBlog = new blogModel(clearData);
       await newBlog.save();
       res.status(201).json({ message: "Blog created successfully", newBlog });
@@ -91,25 +88,7 @@ class BlogController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
-  //update blog
-  // async updateBlog(req: Request, res: Response) {
-  //   try {
-  //     const blogId = req.params.id;
-  //     if (!mongoose.Types.ObjectId.isValid(blogId)) {
-  //       return res.status(400).json({ message: "Invalid blog ID" });
-  //     }
-  //     const updatedBlog = await blogModel.findByIdAndUpdate(blogId, req.body, {
-  //       new: true,
-  //     });
-  //     if (!updatedBlog) {
-  //       return res.status(404).json({ message: "Blog not found" });
-  //     }
-  //     res.json({ message: "Blog updated successfully", updatedBlog });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ message: "Internal server error" });
-  //   }
-  // }
+
   async updateBlog(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
@@ -134,8 +113,8 @@ class BlogController {
       }
 
       const updateData = {
-        ...req.body, // Include other updated fields from request body
-        ...(imageURL ? { image: imageURL } : {}), // Add image URL only if uploaded
+        ...req.body, 
+        ...(imageURL ? { image: imageURL } : {}),
       };
 
       const updatedBlog = await blogModel.findByIdAndUpdate(
