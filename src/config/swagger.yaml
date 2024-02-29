@@ -132,7 +132,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+  /messages:
+    get:
+      tags:
+        - Messages  
+      summary: Get all messages
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: array
+              items:
+                  $ref: '#/components/schemas/Message'
 
+    post:
+      tags:
+        - Messages   
+      summary: Create a message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageInput'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /messages/{id}:
+    get:
+      tags:
+        - Messages
+      summary: Get a message
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+    patch:
+      tags:
+        - Messages
+      summary: Update a message
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMessageInput'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+    delete:
+      tags: 
+        - Messages
+      summary: Delete a message
+      parameters:
+        - in: path
+          name: id  
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
 components:
   schemas:
     User:
@@ -172,7 +265,45 @@ components:
           type: string
         phoneNumber:
           type: string
-
+        password: string
+    Message:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+  
+    CreateMessageInput:
+      type: object
+      required:
+        - name
+        - email
+        - subject
+        - message    
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+      
+    UpdateMessageInput:
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
   securitySchemes:
     cookieAuth:
       type: apiKey
