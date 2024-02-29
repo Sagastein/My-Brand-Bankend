@@ -4,8 +4,7 @@ enum TypeRole {
   user = "user",
   admin = "admin",
 }
-interface User extends Document {
-  _id: Schema.Types.ObjectId;
+export interface User extends Document {
   fullName: string;
   username?: string;
   email: string;
@@ -15,13 +14,14 @@ interface User extends Document {
   role: TypeRole;
   createdAt: Date;
   updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<User>({
   fullName: { type: String, required: true, unique: true },
   username: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   phoneNumber: { type: Number, required: true },
   image: { type: String, default: "https://www.gravatar.com/avatar/" },
   role: {

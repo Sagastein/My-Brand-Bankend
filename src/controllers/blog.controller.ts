@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import mongoose, { Document } from "mongoose";
 import { cloudinary } from "../config/cloudinary";
 import { MulterError } from "multer";
+import { User } from "../models/user.model";
+import { schemas } from "../validation/SchemaValidation";
 interface UploadError extends MulterError {
   message: string;
 }
@@ -42,12 +44,16 @@ class BlogController {
 
   async createBlog(req: Request, res: Response, next: NextFunction) {
     try {
-      const { title, content } = req.body;
-      console.log(req.body);
-      if (!title || !content) {
-        return res.status(400).json({ message: "Missing required fields" });
+      // console.log(req.body);
+      // if (!title || !content) {
+      //   return res.status(400).json({ message: "Missing required fields" });
+      // }
+      const { error, value } = schemas.blogSchema.create.validate(req.body);
+      if (error) {
+        console.log(error);
+        // If validation fails, send back the error message
+        return res.status(400).json({ error: error.details[0].message });
       }
-
       let imageURL: string | undefined;
       const uploadedFile = req.file;
 
@@ -113,7 +119,7 @@ class BlogController {
       }
 
       const updateData = {
-        ...req.body, 
+        ...req.body,
         ...(imageURL ? { image: imageURL } : {}),
       };
 
@@ -135,24 +141,25 @@ class BlogController {
   }
   async likeBlog(req: Request, res: Response) {
     try {
+      let message = "";
       const blogId = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-      const userId = req.body.userId;
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
+      const _id = req.user?._id as Document["_id"];
+
       const blog = await blogModel.findById(blogId);
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
-      if (blog.likes.includes(userId)) {
-        blog.likes = blog.likes.filter((id) => id.toString() !== userId);
+      if (blog.likes.includes(_id)) {
+        blog.likes = blog.likes.filter((id) => id.toString() !== _id);
         await blog.save();
+        message = "blog unlike";
       } else {
-        blog.likes.push(userId);
+        blog.likes.push(_id);
         await blog.save();
+        message = "blog liked";
       }
 
       res.json({ message: "Blog liked successfully", blog });

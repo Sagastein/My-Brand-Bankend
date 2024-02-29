@@ -1,8 +1,9 @@
 //user joi validation schema
 
 import Joi from "joi";
+import { Request, Response, NextFunction } from "express";
 export const validateSchema = (schema: Joi.ObjectSchema) => {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.message });
@@ -25,6 +26,16 @@ export const schemas = {
       fullName: Joi.string().min(6),
       phoneNumber: Joi.number().min(10).max(12),
     }),
+    login: Joi.object({
+      email: Joi.string()
+        .email()
+        .required()
+        .error(new Error("Email is required")),
+      password: Joi.string()
+        .min(6)
+        .required()
+        .error(new Error("Password must be at least 6 characters long")),
+    }),
   },
   messageSchema: {
     create: Joi.object({
@@ -32,6 +43,13 @@ export const schemas = {
       email: Joi.string().email().required(),
       subject: Joi.string().required(),
       message: Joi.string().required(),
+    }),
+  },
+  blogSchema: {
+    create: Joi.object({
+      title: Joi.string().required(),
+      content: Joi.string().required(),
+      
     }),
   },
 };

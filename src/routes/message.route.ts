@@ -1,14 +1,15 @@
 import { Router } from "express";
 import messageController from "../controllers/message.controller";
 import { schemas, validateSchema } from "../validation/SchemaValidation";
+import { checkAuth, checkAdmin } from "../middleware/auth.middleware";
 const router = Router();
 router
-  .get("/", messageController.getMessages)
-  .get("/:id", messageController.getMessage)
+  .get("/", checkAuth, checkAdmin, messageController.getMessages)
+  .get("/:id", checkAuth, checkAdmin, messageController.getMessage)
   .post(
     "/",
     validateSchema(schemas.messageSchema.create),
     messageController.createMessage
   )
-  .delete("/:id", messageController.deleteMessage);
+  .delete("/:id", checkAuth, checkAdmin, messageController.deleteMessage);
 export { router as MessageRouter };

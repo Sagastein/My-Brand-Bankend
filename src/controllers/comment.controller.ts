@@ -53,5 +53,22 @@ class CommentController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+  async deleteComment(req: Request, res: Response) {
+    try {
+      const commentId = req.params.commentId;
+      if (!mongoose.Types.ObjectId.isValid(commentId)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+      const comment = await commentModel.findById(commentId);
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      await commentModel.deleteOne({ _id: comment._id });
+      res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 }
 export default new CommentController();
