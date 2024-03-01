@@ -1,13 +1,19 @@
 # UserController API
 
 openapi: 3.0.0
-# info:
-#   description: API documentation for User Controller
-#   version: "1.0.0"
-#   title: User Management API
+info:
+  description: API documentation for My bland Backend APIs
+  version: "1.0.0"
+  title: My Bland Sage API
+  contact:
+    name: email
+    email: ishimwe.sage.3@gmail.com
+  
 servers:
   - url: http://localhost:8000/api/v1
     description: Local development server
+  - url: "https://hostedversion.com"
+    description: Production development server
 
 paths:
   /users:
@@ -338,6 +344,74 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BlogResponse"
+  /comments/{blogId}:
+    post:
+      summary: Create a comment
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+
+    get:
+      summary: Get comments for a blog
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+
+  /comments/{commentId}:
+    delete:
+      summary: Delete a comment
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 components:
   schemas:
     User:
@@ -468,6 +542,21 @@ components:
           type: string
         blog:
           $ref: "#/components/schemas/Blog"
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        user:
+          type: string
+
+    CommentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        comment:
+          $ref: "#/components/schemas/Comment"
   securitySchemes:
     cookieAuth:
       type: apiKey
