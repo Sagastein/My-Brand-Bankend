@@ -1,0 +1,571 @@
+# UserController API
+
+openapi: 3.0.0
+info:
+  description: API documentation for My bland Backend APIs
+  version: "1.0.0"
+  title: My Bland Sage API
+  contact:
+    name: email
+    email: ishimwe.sage.3@gmail.com
+  
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: "https://hostedversion.com"
+    description: Production development server
+
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserInput"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+    patch:
+      tags:
+        - Users
+      summary: Update a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserInput"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+    delete:
+      tags:
+        - Users
+      summary: Delete a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /users/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /messages:
+    get:
+      tags:
+        - Messages
+      summary: Get all messages
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+              items:
+                $ref: "#/components/schemas/Message"
+
+    post:
+      tags:
+        - Messages
+      summary: Create a message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageInput"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/{id}:
+    get:
+      tags:
+        - Messages
+      summary: Get a message
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+    patch:
+      tags:
+        - Messages
+      summary: Update a message
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMessageInput"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+    delete:
+      tags:
+        - Messages
+      summary: Delete a message
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /blogs:
+    get:
+      summary: Get all blogs
+      tags:
+        - Blogs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Blog"
+
+    post:
+      summary: Create a new blog
+      tags:
+        - Blogs
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateBlogRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogResponse"
+
+  /blogs/{id}:
+    get:
+      summary: Get a blog by ID
+      tags:
+        - Blogs
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Blog"
+
+    delete:
+      summary: Delete a blog
+      tags:
+        - Blogs
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+    patch:
+      summary: Update a blog
+      tags:
+        - Blogs
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UpdateBlogRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogResponse"
+  /blogs/like:
+    patch:
+      summary: Like a blog
+      tags:
+        - Blogs
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogResponse"
+  /comments/{blogId}:
+    post:
+      summary: Create a comment
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+
+    get:
+      summary: Get comments for a blog
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+
+  /comments/{commentId}:
+    delete:
+      summary: Delete a comment
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - phoneNumber
+        - fullName
+        - password
+      properties:
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        fullName:
+          type: string
+        password:
+          type: string
+
+    CreateUserInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        password: string
+
+    UpdateUserInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        password: string
+    Message:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+
+    CreateMessageInput:
+      type: object
+      required:
+        - name
+        - email
+        - subject
+        - message
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+
+    UpdateMessageInput:
+      name:
+        type: string
+      email:
+        type: string
+      subject:
+        type: string
+      message:
+        type: string
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+    Blog:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+        isPublished:
+          type: boolean
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+
+    CreateBlogRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+          format: binary
+
+    UpdateBlogRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+          format: binary
+
+    BlogResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        blog:
+          $ref: "#/components/schemas/Blog"
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        user:
+          type: string
+
+    CommentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        comment:
+          $ref: "#/components/schemas/Comment"
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Authorization
+
+security:
+  - cookieAuth: []
+
+tags:
+  - name: Users
+    description: User management
