@@ -21,10 +21,19 @@ export const schemas = {
       phoneNumber: Joi.number().required(),
     }),
     update: Joi.object({
-      email: Joi.string().email(),
-      password: Joi.string().min(6),
+      email: Joi.string().email().when("$email", {
+        is: Joi.exist(),
+        then: Joi.string().email().min(1).required(),
+        otherwise: Joi.string().email(),
+      }),
+      password: Joi.string().when("$password", {
+        is: Joi.exist(),
+        then: Joi.string().min(6).required(),
+        otherwise: Joi.string().min(6),
+      }),
+
       fullName: Joi.string().min(6),
-      phoneNumber: Joi.number().min(10).max(12),
+      phoneNumber: Joi.number(),
     }),
     login: Joi.object({
       email: Joi.string()
@@ -49,7 +58,16 @@ export const schemas = {
     create: Joi.object({
       title: Joi.string().required(),
       content: Joi.string().required(),
-      
+    }),
+    update: Joi.object({
+      title: Joi.string().when("$title", {
+        is: Joi.exist(),
+        then: Joi.string().min(1).required(),
+      }),
+      content: Joi.string().when("$content", {
+        is: Joi.exist(),
+        then: Joi.string().min(1).required(),
+      }),
     }),
   },
 };
