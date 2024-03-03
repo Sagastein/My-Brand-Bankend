@@ -17,9 +17,10 @@ router.patch(
   "/:id",
   checkAuth,
   checkAdmin,
+
   upload.single("image"),
   BlogController.updateBlog
 );
-router.patch("/like/:id", checkAuth, BlogController.likeBlog);
+router.patch("/like/:id", checkAuth, BlogController.toggleLike);
 
 export { router as blogRouter };

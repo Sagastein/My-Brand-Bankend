@@ -12,7 +12,7 @@ router.post(
   validateSchema(schemas.userSchema.create),
   userController.createUser
 );
-router.put("/:id", checkAuth, userController.updateUser);
+router.put("/:id", checkAuth,validateSchema(schemas.userSchema.update), userController.updateUser);
 router.delete("/:id", checkAuth, userController.deleteUser);
 router.post(
   "/login",

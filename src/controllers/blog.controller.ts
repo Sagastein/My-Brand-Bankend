@@ -20,17 +20,11 @@ class BlogController {
   }
   async getBlogById(req: Request, res: Response) {
     try {
-      const blogId = req.params.id; // Get blog ID from request parameter
-
-      // Validate blog ID
+      const blogId = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-
-      // Fetch the blog with populated comments and likes
-      const blog = await blogModel.findById(blogId);
-
-      // Check if blog exists
+      const blog = await blogModel.findById(blogId).populate("comments");
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
@@ -101,6 +95,12 @@ class BlogController {
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
+      const { error, value } = schemas.blogSchema.update.validate(req.body);
+      if (error) {
+        console.log(error);
+        // If validation fails, send back the error message
+        return res.status(400).json({ error: error.details[0].message });
+      }
 
       let imageURL: string | undefined;
       const uploadedFile = req.file;
@@ -139,32 +139,41 @@ class BlogController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
-  async likeBlog(req: Request, res: Response) {
+
+  async toggleLike(req: Request, res: Response) {
     try {
-      let message = "";
       const blogId = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-      const _id = req.user?._id as Document["_id"];
+      const userId = req.user?._id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
       const blog = await blogModel.findById(blogId);
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
-      if (blog.likes.includes(_id)) {
-        blog.likes = blog.likes.filter((id) => id.toString() !== _id);
-        await blog.save();
-        message = "blog unlike";
+
+      const userIndex = blog.likes.indexOf(userId);
+      if (userIndex !== -1) {
+        blog.likes.splice(userIndex, 1);
       } else {
-        blog.likes.push(_id);
-        await blog.save();
-        message = "blog liked";
+        blog.likes.push(userId);
       }
 
-      res.json({ message: "Blog liked successfully", blog });
-    } catch (error) {
-      console.error(error);
+      await blog.save();
+
+      res.json({
+        message:
+          userIndex !== -1
+            ? "Blog unliked successfully"
+            : "Blog liked successfully",
+        blog,
+      });
+    } catch (error: any) {
+      console.error(error.message);
       res.status(500).json({ message: "Internal server error" });
     }
   }
