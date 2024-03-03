@@ -189,29 +189,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Message"
 
-    patch:
-      tags:
-        - Messages
-      summary: Update a message
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateMessageInput"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Message"
-
     delete:
       tags:
         - Messages
@@ -326,7 +303,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BlogResponse"
-  /blogs/like:
+  /blogs/like/{id}:
     patch:
       summary: Like a blog
       tags:
@@ -546,8 +523,6 @@ components:
       type: object
       properties:
         content:
-          type: string
-        user:
           type: string
 
     CommentResponse:
