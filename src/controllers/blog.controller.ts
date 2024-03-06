@@ -1,90 +1,64 @@
-import blogModel from "../models/blog.model";
 import { NextFunction, Request, Response } from "express";
-import mongoose, { Document } from "mongoose";
-import { cloudinary } from "../config/cloudinary";
-import { MulterError } from "multer";
-import { User } from "../models/user.model";
+import blogService from "../service/blog.service";
 import { schemas } from "../validation/SchemaValidation";
-interface UploadError extends MulterError {
-  message: string;
-}
+import { User } from "../models/user.model";
+
 class BlogController {
-  //get all blogs
   async getBlogs(req: Request, res: Response) {
     try {
-      const blogs = await blogModel.find();
+      const blogs = await blogService.getBlogs();
       res.json(blogs);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
   }
+
   async getBlogById(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return res.status(400).json({ message: "Invalid blog ID" });
-      }
-      const blog = await blogModel.findById(blogId).populate("comments");
-      if (!blog) {
-        return res.status(404).json({ message: "Blog not found" });
-      }
-
+      const blog = await blogService.getBlogById(blogId);
       res.json(blog);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error.message === "Invalid blog ID") {
+        return res.status(400).json({ message: error.message });
+      } else if (error.message === "Blog not found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: "Internal server error" });
     }
   }
 
   async createBlog(req: Request, res: Response, next: NextFunction) {
     try {
-      // console.log(req.body);
-      // if (!title || !content) {
-      //   return res.status(400).json({ message: "Missing required fields" });
-      // }
       const { error, value } = schemas.blogSchema.create.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
-      let imageURL: string | undefined;
-      const uploadedFile = req.file;
 
-      if (uploadedFile === undefined) {
+      const uploadedFile = req.file;
+      if (!uploadedFile) {
         return res.status(400).json({ message: "No image uploaded" });
       }
 
-      const result = await cloudinary.uploader.upload(
-        (uploadedFile as Express.Multer.File).path
-      );
-      imageURL = result.secure_url;
-      if (!imageURL)
-        return res
-          .status(400)
-          .json({ message: "Image upload failed", imageURL });
-      const clearData = { ...req.body, image: imageURL };
-      const newBlog = new blogModel(clearData);
-      await newBlog.save();
+      const newBlog = await blogService.createBlog(req.body, uploadedFile);
       res.status(201).json({ message: "Blog created successfully", newBlog });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.status(500).json({ message: "Internal server error", error });
     }
   }
+
   async deleteBlog(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return res.status(400).json({ message: "Invalid blog ID" });
+      const result = await blogService.deleteBlog(blogId);
+      res.json(result);
+    } catch (error: any) {
+      if (error.message === "Invalid blog ID") {
+        return res.status(400).json({ message: error.message });
+      } else if (error.message === "Blog not found") {
+        return res.status(404).json({ message: error.message });
       }
-      const blog = await blogModel.findByIdAndDelete(blogId);
-      if (!blog) {
-        return res.status(404).json({ message: "Blog not found" });
-      }
-      res.json({ message: "Blog deleted successfully" });
-    } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -92,50 +66,26 @@ class BlogController {
   async updateBlog(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return res.status(400).json({ message: "Invalid blog ID" });
-      }
       const { error, value } = schemas.blogSchema.update.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
 
-      let imageURL: string | undefined;
       const uploadedFile = req.file;
-
-      // Check if image was uploaded, and handle upload and update conditionally
-      if (uploadedFile) {
-        try {
-          const result = await cloudinary.uploader.upload(
-            (uploadedFile as Express.Multer.File).path
-          );
-          imageURL = result.secure_url;
-        } catch (error) {
-          console.error(error);
-          return res.status(500).json({ message: "Image upload failed" });
-        }
-      }
-
-      const updateData = {
-        ...req.body,
-        ...(imageURL ? { image: imageURL } : {}),
-      };
-
-      const updatedBlog = await blogModel.findByIdAndUpdate(
+      const updatedBlog = await blogService.updateBlog(
         blogId,
-        updateData,
-        { new: true }
+        req.body,
+        uploadedFile
       );
-
-      if (!updatedBlog) {
-        return res.status(404).json({ message: "Blog not found" });
-      }
-
       res.json({ message: "Blog updated successfully", updatedBlog });
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error.message === "Invalid blog ID") {
+        return res.status(400).json({ message: error.message });
+      } else if (error.message === "Blog not found") {
+        return res.status(404).json({ message: error.message });
+      } else if (error.message === "Image upload failed") {
+        return res.status(500).json({ message: error.message });
+      }
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -143,39 +93,22 @@ class BlogController {
   async toggleLike(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
-      if (!mongoose.Types.ObjectId.isValid(blogId)) {
-        return res.status(400).json({ message: "Invalid blog ID" });
-      }
-      const userId = req.user?._id;
+      const userId = (req.user as User)._id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const blog = await blogModel.findById(blogId);
-      if (!blog) {
-        return res.status(404).json({ message: "Blog not found" });
-      }
-
-      const userIndex = blog.likes.indexOf(userId);
-      if (userIndex !== -1) {
-        blog.likes.splice(userIndex, 1);
-      } else {
-        blog.likes.push(userId);
-      }
-
-      await blog.save();
-
-      res.json({
-        message:
-          userIndex !== -1
-            ? "Blog unliked successfully"
-            : "Blog liked successfully",
-        blog,
-      });
+      const result = await blogService.toggleLike(blogId, userId);
+      res.json(result);
     } catch (error: any) {
-      console.error(error.message);
+      if (error.message === "Invalid blog ID") {
+        return res.status(400).json({ message: error.message });
+      } else if (error.message === "Blog not found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: "Internal server error" });
     }
   }
 }
+
 export default new BlogController();
