@@ -1,5 +1,5 @@
 import { Schema, model, Document } from "mongoose";
-interface Comment {
+export interface Comment {
   _id: Schema.Types.ObjectId;
   user: Schema.Types.ObjectId;
   content: string;
