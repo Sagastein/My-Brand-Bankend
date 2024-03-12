@@ -35,24 +35,24 @@ class MessageController {
       return res.status(500).json({ message: error.message });
     }
   }
-  async updateMessage(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid message id" });
-      }
-      const messageExists = await messageModel.findById(id);
-      if (!messageExists) {
-        return res.status(404).json({ message: "Message not found" });
-      }
-      const message = await messageModel.findByIdAndUpdate(id, req.body, {
-        new: true,
-      });
-      return res.json(message);
-    } catch (error: any) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
+  // async updateMessage(req: Request, res: Response) {
+  //   try {
+  //     const { id } = req.params;
+  //     if (!mongoose.Types.ObjectId.isValid(id)) {
+  //       return res.status(400).json({ message: "Invalid message id" });
+  //     }
+  //     const messageExists = await messageModel.findById(id);
+  //     if (!messageExists) {
+  //       return res.status(404).json({ message: "Message not found" });
+  //     }
+  //     const message = await messageModel.findByIdAndUpdate(id, req.body, {
+  //       new: true,
+  //     });
+  //     return res.json(message);
+  //   } catch (error: any) {
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // }
   async deleteMessage(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -64,7 +64,7 @@ class MessageController {
         return res.status(404).json({ message: "Message not found" });
       }
       await messageModel.findByIdAndDelete(id);
-      return res.json({ message: "Message deleted successfully" });
+      return res.status(200).json({ message: "Message deleted successfully" });
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
     }
