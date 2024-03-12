@@ -13,13 +13,16 @@ import YAML from "yamljs";
 import connectDB from "./config/connectDB";
 
 const swaggerDocument = YAML.load("./src/config/swagger.yaml");
-
+const corsOption = {
+  origin:'*',
+  credentials: true,
+};
 export function configureApp(): express.Application {
   const app = express();
 
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   app.use(express.json());
-  app.use(cors());
+  app.use(cors(corsOption));
   app.use(bodyParser.json());
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: true }));
