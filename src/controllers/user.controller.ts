@@ -45,7 +45,7 @@ class UserController {
       }
       const user = new userModel(req.body);
       await user.save();
-      return res.json(user);
+      return res.status(200).json(user);
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
     }
@@ -86,6 +86,33 @@ class UserController {
       }
     }
   }
+  //toggle user active status active or blocked
+  async toggleUserStatus(req: Request, res: Response) {
+    let message = "";
+    try {
+      const { id } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid user id" });
+      }
+      const userExists = await userModel.findById(id);
+      if (!userExists) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const user = await userModel.findById(id);
+      if (user && user.status === "active") {
+        user.status = "blocked";
+        message = "User blocked successfully";
+      } else if (user) {
+        user.status = "active";
+        message = "User activated successfully";
+      }
+      await user?.save();
+      return res.status(200).json({ message: message, user });
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
   async Login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
@@ -113,9 +140,9 @@ class UserController {
         .status(200)
         .json({
           message: "Authorized",
+          accessToken,
           user: userWithoutPassword,
         });
-      return res.json(user);
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
