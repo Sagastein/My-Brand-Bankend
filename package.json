@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --require ts-node/register 'tests/**/*.spec.ts'",
     "ts-test": "ts-mocha ./tests/**.ts",
-    "jest": "jest --no-cache  --detectOpenHandles --runInBand --forceExit ",
+    "jest": "jest  --detectOpenHandles  ",
     "start": "tsc && node dist/server.js",
     "server": "nodemon"
   },

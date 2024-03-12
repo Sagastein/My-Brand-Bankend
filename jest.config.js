@@ -18,6 +18,6 @@ module.exports = {
     "src/middleware/**",
     "src/models/**",
     "src/routes/**",
-    "!src/controllers/**",
+    "src/controllers/**",
   ],
 };
