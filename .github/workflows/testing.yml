@@ -12,7 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: app:test
 
     steps:
     - name: Checkout repository
