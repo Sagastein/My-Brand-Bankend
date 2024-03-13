@@ -13,7 +13,7 @@ class BlogController {
   async getBlogs(req: Request, res: Response) {
     try {
       const blogs = await blogModel.find();
-      res.json(blogs);
+      res.status(200).json(blogs);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
@@ -24,7 +24,14 @@ class BlogController {
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-      const blog = await blogModel.findById(blogId).populate("comments");
+      const blog = await blogModel.findById(blogId).populate({
+        path: "comments",
+        populate: {
+          path: "user",
+          model: "User",
+          select: "username email", // replace 'User' with your actual User model name
+        },
+      });
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
@@ -38,14 +45,8 @@ class BlogController {
 
   async createBlog(req: Request, res: Response, next: NextFunction) {
     try {
-      // console.log(req.body);
-      // if (!title || !content) {
-      //   return res.status(400).json({ message: "Missing required fields" });
-      // }
       const { error, value } = schemas.blogSchema.create.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
       let imageURL: string | undefined;
@@ -68,7 +69,6 @@ class BlogController {
       await newBlog.save();
       res.status(201).json({ message: "Blog created successfully", newBlog });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error", error });
     }
   }
@@ -97,8 +97,6 @@ class BlogController {
       }
       const { error, value } = schemas.blogSchema.update.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
 
@@ -147,9 +145,6 @@ class BlogController {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
       const userId = req.user?._id;
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
       const blog = await blogModel.findById(blogId);
       if (!blog) {
@@ -175,6 +170,15 @@ class BlogController {
     } catch (error: any) {
       console.error(error.message);
       res.status(500).json({ message: "Internal server error" });
+    }
+  }
+  //get popular blogs by likes only three
+  async getPopularBlogs(req: Request, res: Response) {
+    try {
+      const blogs = await blogModel.find().sort({ likes: -1 }).limit(3);
+      res.status(200).json(blogs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   }
 }

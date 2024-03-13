@@ -16,7 +16,8 @@ export const checkAuth = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authorization = req.cookies["Authorization"];
+  const authorization =
+    req.cookies["Authorization"] || req.headers.authorization;
   if (!authorization) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }

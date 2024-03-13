@@ -6,7 +6,8 @@ class CommentController {
   async createComment(req: Request, res: Response) {
     try {
       const blogId = req.params.blogId;
-      const { content, user } = req.body;
+      const { content } = req.body;
+      const user = req.user?._id;
 
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
@@ -33,7 +34,6 @@ class CommentController {
         .status(201)
         .json({ message: "Comment created successfully", comment: newComment });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -43,13 +43,18 @@ class CommentController {
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
-      const blog = await blogModel.findById(blogId).populate("comments");
+      const blog = await blogModel.findById(blogId).populate({
+        path: "comments",
+        populate: {
+          path: "user",
+          model: "User", // replace 'User' with your actual User model name
+        },
+      });
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
       res.status(200).json({ comments: blog.comments });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -66,7 +71,6 @@ class CommentController {
       await commentModel.deleteOne({ _id: comment._id });
       res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
