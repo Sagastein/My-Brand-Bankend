@@ -45,14 +45,8 @@ class BlogController {
 
   async createBlog(req: Request, res: Response, next: NextFunction) {
     try {
-      // console.log(req.body);
-      // if (!title || !content) {
-      //   return res.status(400).json({ message: "Missing required fields" });
-      // }
       const { error, value } = schemas.blogSchema.create.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
       let imageURL: string | undefined;
@@ -75,7 +69,6 @@ class BlogController {
       await newBlog.save();
       res.status(201).json({ message: "Blog created successfully", newBlog });
     } catch (error) {
-      console.error(error);
       res.status(500).json({ message: "Internal server error", error });
     }
   }
@@ -104,8 +97,6 @@ class BlogController {
       }
       const { error, value } = schemas.blogSchema.update.validate(req.body);
       if (error) {
-        console.log(error);
-        // If validation fails, send back the error message
         return res.status(400).json({ error: error.details[0].message });
       }
 
@@ -154,7 +145,6 @@ class BlogController {
         return res.status(400).json({ message: "Invalid blog ID" });
       }
       const userId = req.user?._id;
-    
 
       const blog = await blogModel.findById(blogId);
       if (!blog) {
