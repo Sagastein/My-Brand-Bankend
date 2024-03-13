@@ -18,7 +18,7 @@ describe("Blog API endpoints", () => {
 
     // Extract the token from the response cookies
     token = loginResponse.body.accessToken;
-    console.log(token);
+
   });
 
   it("GET /api/v1/blogs should return all blogs", async () => {
