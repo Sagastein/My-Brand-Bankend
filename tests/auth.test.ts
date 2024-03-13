@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 import { configureApp, server } from "../src/server";
 import { describe, expect, it, afterAll } from "@jest/globals";
 import userModel, { User } from "../src/models/user.model";
-import { checkAuth } from "../src/middleware/auth.middleware";
-
+import dotenv from "dotenv"
+dotenv.config();
 const app = configureApp();
 
 describe("GET /api/v1/users", () => {
@@ -35,9 +35,7 @@ describe("GET /api/v1/users", () => {
   });
 
   it("should return 200 and user data if a valid token is provided", async () => {
-    const validToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRGF0YSI6eyJfaWQiOiI2NWRlNGNlZWU3NmQzNmY2YTNmNDAxYjYiLCJmdWxsTmFtZSI6ImlzaGltd2Ugc2FnZSIsImVtYWlsIjoiaXNoaW13ZUBnbWFpbC5jb20iLCJwaG9uZU51bWJlciI6OTg0OTM0ODkzNDMsImltYWdlIjoiaHR0cHM6Ly93d3cuZ3JhdmF0YXIuY29tL2F2YXRhci8iLCJyb2xlIjoiYWRtaW4iLCJjcmVhdGVkQXQiOiIyMDI0LTAyLTI3VDIwOjU4OjIyLjc5MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTAyLTI3VDIwOjU4OjIyLjc5MloiLCJ1c2VybmFtZSI6ImlzaGltd2U2OTE5IiwiX192IjowfSwiaWF0IjoxNzA5ODkxODg1LCJleHAiOjE3MDk5Mjc4ODV9.zdhUOjk1Zv9blwoDqT4-9LIFijzVLi6UtxOWAu8eliE";
-
+    const validToken = process.env.LONG_JWT_KEY;
     const response = await request(app)
       .get("/api/v1/users")
       .set("Cookie", [`Authorization=${validToken}`]);
@@ -45,9 +43,6 @@ describe("GET /api/v1/users", () => {
     expect(response.body).toMatchObject(expect.any(Array));
   });
   //while loging in the user check if password store in the db is hashed
-  
-  
-
 });
 
 afterAll(async () => {
