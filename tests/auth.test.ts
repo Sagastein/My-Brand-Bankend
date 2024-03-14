@@ -14,7 +14,7 @@ describe("GET /api/v1/users", () => {
     user = await userModel.findOne();
   });
 
-  it("should return 401 if no token is provided", async () => {
+  it("should return 401 if no token is provided.", async () => {
     const response = await request(app).get("/api/v1/users");
     expect(response.statusCode).toBe(401);
     expect(response.body).toHaveProperty(
