@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from "express";
 import mongoose, { Document } from "mongoose";
 import { cloudinary } from "../config/cloudinary";
 import { MulterError } from "multer";
-import { User } from "../models/user.model";
+import userModel, { User } from "../models/user.model";
 import { schemas } from "../validation/SchemaValidation";
+import commentModel from "../models/comment.model";
 interface UploadError extends MulterError {
   message: string;
 }
@@ -29,7 +30,7 @@ class BlogController {
         populate: {
           path: "user",
           model: "User",
-          select: "username email", // replace 'User' with your actual User model name
+          select: "username email image", // replace 'User' with your actual User model name
         },
       });
       if (!blog) {
@@ -177,6 +178,17 @@ class BlogController {
     try {
       const blogs = await blogModel.find().sort({ likes: -1 }).limit(3);
       res.status(200).json(blogs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  //get total comments total users total users
+  async getBlogStats(req: Request, res: Response) {
+    try {
+      const totalBlogs = await blogModel.countDocuments();
+      const totalComments = await commentModel.countDocuments();
+      const totalUsers = await userModel.countDocuments();
+      res.status(200).json({ totalBlogs, totalComments, totalUsers });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
