@@ -14,7 +14,11 @@ import connectDB from "./config/connectDB";
 
 const swaggerDocument = YAML.load("./src/config/swagger.yaml");
 const corsOption = {
-  origin:'*',
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5500",
+    "https://my-brand-bankend.onrender.com",
+  ],
   credentials: true,
 };
 export function configureApp(): express.Application {
