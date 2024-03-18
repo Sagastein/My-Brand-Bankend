@@ -207,8 +207,39 @@ describe("Blog API endpoints", () => {
       updatedAt: expect.any(String),
       __v: expect.any(Number),
     });
+   
+  });
+describe("Blog dashboard", () => {
+  it("gets popular blogs", async () => {
+    const response = await request(app).get("/api/v1/blogs/popular").set("Cookie", [`Authorization=${token}`]);;
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          // replace 'title', 'content', etc. with your actual blog fields
+          title: expect.any(String),
+          content: expect.any(String),
+          likes: expect.any(Array),
+          // ...
+        }),
+      ])
+    );
   });
 
+  it("gets blog stats", async () => {
+    const response = await request(app).get("/api/v1/blogs/stats");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        totalBlogs: expect.any(Number),
+        totalComments: expect.any(Number),
+        totalUsers: expect.any(Number),
+      })
+    );
+  });
+});
   afterAll(async () => {
     await mongoose.connection.close();
     server.close();

@@ -74,6 +74,10 @@ export const schemas = {
         is: Joi.exist(),
         then: Joi.string().min(1).required(),
       }),
+      image: Joi.string().when("$image", {
+        is: Joi.exist(),
+        then: Joi.string().min(1).required(),
+      }),
     }),
   },
 };
