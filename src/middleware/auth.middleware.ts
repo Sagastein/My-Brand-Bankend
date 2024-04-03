@@ -31,6 +31,8 @@ export const checkAuth = async (
 
     next();
   } catch (error) {
+    //clear cookies
+    res.clearCookie("Authorization");
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };
