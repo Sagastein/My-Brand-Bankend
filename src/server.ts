@@ -1,5 +1,6 @@
+// src/server.ts
 import express, { Router } from "express";
-import connectDB from "./config/connectDB";
+import { createServer } from "http";
 import { UserRouter } from "./routes/user.route";
 import { MessageRouter } from "./routes/message.route";
 import { blogRouter } from "./routes/blog.route";
@@ -9,27 +10,58 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import connectDB from "./config/connectDB";
+
 const swaggerDocument = YAML.load("./src/config/swagger.yaml");
-const server = express();
-const PORT = 8000;
-server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-server.use(express.json());
-server.use(cors());
-server.use(bodyParser.json());
-server.use(cookieParser());
-server.use(express.urlencoded({ extended: true }));
-const app = Router();
-server.use("/api/v1", app);
-app.use("/users", UserRouter);
-app.use("/messages", MessageRouter);
-app.use("/blogs", blogRouter);
-app.use("/comments", commentRouter);
-server.get("/", (req, res) => {
-  res.send("Hello World");
-});
+const corsOption = {
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5500",
+    "https://my-brand-bankend.onrender.com",
+    "https://my-bland-sage.netlify.app",
+    "https://sagastein.github.io",
+  ],
+  credentials: true,
+};
+export function configureApp(): express.Application {
+  const app = express();
+
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use(express.json());
+  app.use(cors(corsOption));
+  app.use(bodyParser.json());
+  app.use(cookieParser());
+  app.use(express.urlencoded({ extended: true }));
+
+  const apiRouter = Router();
+  apiRouter.use("/users", UserRouter);
+  apiRouter.use("/messages", MessageRouter);
+  apiRouter.use("/blogs", blogRouter);
+  apiRouter.use("/comments", commentRouter);
+
+  app.use("/api/v1", apiRouter);
+
+  app.get("/", (req, res) => {
+    res.status(200).send("welcome to sage brand");
+  });
+  app.all("*", (req, res) => {
+    res.status(404).json({
+      message: "Route not found",
+    });
+  });
+
+  return app;
+}
+//app.all route not found
+
+const app = configureApp();
+const PORT = process.env.PORT || 8000;
+const server = createServer(app);
 
 connectDB().then(() => {
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 });
+
+export { server };

@@ -1,6 +1,6 @@
 import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcrypt";
-enum TypeRole {
+export enum TypeRole {
   user = "user",
   admin = "admin",
 }
@@ -12,6 +12,7 @@ export interface User extends Document {
   image: string;
   password: string;
   role: TypeRole;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -23,12 +24,16 @@ const userSchema = new Schema<User>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
   phoneNumber: { type: Number, required: true },
-  image: { type: String, default: "https://www.gravatar.com/avatar/" },
+  image: {
+    type: String,
+    default: `https://ui-avatars.com/api/?background=random&name=sage`,
+  },
   role: {
     type: String,
     enum: [TypeRole.user, TypeRole.admin],
     default: TypeRole.user,
   },
+  status: { type: String, default: "active" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -46,7 +51,11 @@ userSchema.pre("save", function (next) {
 
   next();
 });
-
+// before saving img, we need to to get username add to link image
+userSchema.pre("save", function (next) {
+  this.image = `https://ui-avatars.com/api/?background=random&name=${this.username}`;
+  next();
+});
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);

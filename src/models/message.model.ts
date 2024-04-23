@@ -2,7 +2,7 @@
 
 import { Schema, Document, model } from "mongoose";
 
-interface Message extends Document {
+export interface Message extends Document {
   _id: Schema.Types.ObjectId;
   name: string;
   email: string;

@@ -11,6 +11,8 @@ router.post(
   upload.single("image"),
   BlogController.createBlog
 );
+router.get("/popular", checkAuth, BlogController.getPopularBlogs);
+router.get("/stats", BlogController.getBlogStats);
 router.get("/:id", BlogController.getBlogById);
 router.delete("/:id", checkAuth, checkAdmin, BlogController.deleteBlog);
 router.patch(
@@ -22,5 +24,7 @@ router.patch(
   BlogController.updateBlog
 );
 router.patch("/like/:id", checkAuth, BlogController.toggleLike);
+
+
 
 export { router as blogRouter };

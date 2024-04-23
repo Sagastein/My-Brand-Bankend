@@ -73,7 +73,6 @@ class UserController {
         .json({ message: error.message });
     }
   }
-  
 }
 
 export default new UserController();

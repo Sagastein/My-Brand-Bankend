@@ -8,5 +8,6 @@ node_modules/
 
 # Ignore build output directory
 dist/
+coverage
 .vscode
 coverage/
