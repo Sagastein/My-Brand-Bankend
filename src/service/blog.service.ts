@@ -1,10 +1,11 @@
 import blogModel from "../models/blog.model";
 import mongoose from "mongoose";
 import { cloudinary } from "../config/cloudinary";
-import { User } from "../models/user.model";
+import userModel, { User } from "../models/user.model";
+import commentModel from "../models/comment.model";
 
 export class BlogService {
-  async getBlogs() {
+  async getBlog() {
     return await blogModel.find();
   }
 
@@ -108,6 +109,13 @@ export class BlogService {
           : "Blog liked successfully",
       blog,
     };
+  }
+  async getBlogStats() {
+    const totalBlogs = await blogModel.countDocuments();
+    const totalComments = await commentModel.countDocuments();
+    const totalUsers = await userModel.countDocuments();
+
+    return { totalBlogs, totalComments, totalUsers };
   }
 }
 

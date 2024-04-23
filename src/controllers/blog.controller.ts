@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import blogService from "../service/blog.service";
 import { schemas } from "../validation/SchemaValidation";
-import { User } from "../models/user.model";
+import userModel, { User } from "../models/user.model";
+import blogModel from "../models/blog.model";
+import commentModel from "../models/comment.model";
 
 class BlogController {
   async getBlogs(req: Request, res: Response) {
     try {
-      const blogs = await blogService.getBlogs();
+      const blogs = await blogService.getBlog();
       res.json(blogs);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -89,7 +91,14 @@ class BlogController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
-
+  async getPopularBlogs(req: Request, res: Response) {
+    try {
+      const blogs = await blogModel.find().sort({ likes: -1 }).limit(3);
+      res.status(200).json(blogs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  }
   async toggleLike(req: Request, res: Response) {
     try {
       const blogId = req.params.id;
@@ -107,6 +116,14 @@ class BlogController {
         return res.status(404).json({ message: error.message });
       }
       res.status(500).json({ message: "Internal server error" });
+    }
+  }
+  async getBlogStats(req: Request, res: Response) {
+    try {
+      const stats = await blogService.getBlogStats();
+      res.status(200).json(stats);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   }
 }
