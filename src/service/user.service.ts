@@ -64,7 +64,7 @@ export class UserService {
   async login(email: string, password: string) {
     const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("user not found");
     }
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {

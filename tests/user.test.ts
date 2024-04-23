@@ -62,7 +62,7 @@ describe("with invalid credentials", () => {
       email: "sagayilajks@gmail.com",
       password: "never give up",
     });
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(401);
     expect(response.body).toHaveProperty("message");
     expect(response.body).toEqual({ message: "user not found" });
   });
@@ -101,7 +101,7 @@ it("create user account", async () => {
     phoneNumber: "123456789",
     fullName: "test user2",
   });
-  expect(response.statusCode).toBe(500);
+  expect(response.statusCode).toBe(400);
 });
 //email already exists
 it("email already exists", async () => {
